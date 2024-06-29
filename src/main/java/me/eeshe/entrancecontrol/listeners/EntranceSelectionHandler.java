@@ -9,12 +9,14 @@ import me.eeshe.entrancecontrol.managers.EntranceSelectionManager;
 import me.eeshe.entrancecontrol.models.EntranceSelection;
 import me.eeshe.entrancecontrol.models.config.Message;
 import me.eeshe.entrancecontrol.models.config.Sound;
+import me.eeshe.entrancecontrol.util.LogUtil;
 import me.eeshe.penpenlib.models.Scheduler;
 import me.eeshe.penpenlib.models.config.CommonSound;
 import me.eeshe.penpenlib.models.config.MenuItem;
 import me.eeshe.penpenlib.util.InputUtil;
 import me.eeshe.penpenlib.util.LibMessager;
 import me.eeshe.penpenlib.util.MenuUtil;
+import me.eeshe.penpenlib.util.StringUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -93,14 +95,38 @@ public class EntranceSelectionHandler implements Listener {
                 Message.ALREADY_SELECTED_ENTRANCE.sendError(player);
                 return;
             }
+            int playerMaximumSelectedEntrances = plugin.getEntranceSelectionManager().computePlayerSelectedEntrancesLimit(player);
+            if (entranceSelection.getProtectedEntrances().size() >= playerMaximumSelectedEntrances) {
+                Message.EXCEEDED_SELECTION_AMOUNT.sendError(player);
+                return;
+            }
             entranceSelection.addProtectedEntrance(player, clickedLocation);
+            showSelectionActionBar(player, entranceSelection);
             Sound.SELECTION_ADD.play(player);
         } else {
             if (!entranceSelection.getProtectedEntrances().contains(clickedLocation)) return;
 
             entranceSelection.removeProtectedEntrance(clickedLocation);
+            showSelectionActionBar(player, entranceSelection);
             Sound.SELECTION_REMOVE.play(player);
         }
+    }
+
+    /**
+     * Shows the player's selection info action bar.
+     *
+     * @param player Player to show the action bar for.
+     * @param entranceSelection EntranceSelection to show the action bar of.
+     */
+    private void showSelectionActionBar(Player player, EntranceSelection entranceSelection) {
+        int playerMaximumSelectedEntrances = plugin.getEntranceSelectionManager().computePlayerSelectedEntrancesLimit(player);
+        if (playerMaximumSelectedEntrances == Integer.MAX_VALUE) return;
+
+        // Player has limited locked entrances, display how many they have left
+        Message.SELECTED_ENTRANCES_ACTION_BAR.send(player, true, null, Map.ofEntries(
+                Map.entry("%selected_entrances%", StringUtil.formatNumber(entranceSelection.getProtectedEntrances().size())),
+                Map.entry("%maximum_entrances%", StringUtil.formatNumber(playerMaximumSelectedEntrances))
+        ));
     }
 
     /**
@@ -173,13 +199,37 @@ public class EntranceSelectionHandler implements Listener {
 
         editSelectionEndConfirmations.remove(playerUuid);
         EntranceSelection entranceSelection = plugin.getEntranceSelectionEditors().remove(playerUuid);
-        if (entranceSelection.getProtectedEntrances().isEmpty()) {
+        Set<Location> protectedEntrances = entranceSelection.getProtectedEntrances();
+        if (protectedEntrances.isEmpty()) {
             Message.NO_SELECTED_ENTRANCES.sendError(player);
+            return;
+        }
+        double playerMaximumSelectionDistance = plugin.getEntranceSelectionManager().computePlayerMaximumSelectionDistance(player);
+        if (findLargestSelectionDistance(protectedEntrances) > playerMaximumSelectionDistance) {
+            Message.EXCEEDED_SELECTION_DISTANCE.sendError(player, Map.of("%maximum_distance%",
+                    StringUtil.formatNumber(playerMaximumSelectionDistance)));
             return;
         }
         entranceSelection.register();
         entranceSelection.stopHighlightTask(player);
         Message.ENTRANCE_SELECTION_END.send(player, true, CommonSound.SUCCESS, new HashMap<>());
+    }
+
+    public double findLargestSelectionDistance(Set<Location> locations) {
+        if (locations == null || locations.size() < 2) {
+            return 0.0;
+        }
+        double maxDistance = 0.0;
+        Location[] locArray = locations.toArray(new Location[0]);
+        for (int i = 0; i < locArray.length - 1; i++) {
+            for (int j = i + 1; j < locArray.length; j++) {
+                double distance = locArray[i].distanceSquared(locArray[j]);
+                if (distance <= maxDistance) continue;
+
+                maxDistance = distance;
+            }
+        }
+        return Math.sqrt(maxDistance);
     }
 
     @EventHandler

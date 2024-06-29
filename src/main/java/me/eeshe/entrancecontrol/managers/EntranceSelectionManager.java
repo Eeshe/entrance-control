@@ -152,11 +152,31 @@ public class EntranceSelectionManager extends DataManager {
         );
     }
 
+    /**
+     * Computes the selected entrances limit of the passed player.
+     *
+     * @param player Player to compute the selected entrances limit of.
+     * @return The selected entrances limit of the player.
+     */
     public int computePlayerSelectedEntrancesLimit(Player player) {
         EntranceControl plugin = (EntranceControl) getPlugin();
         return PermissionUtil.computePermissionValue(player,
                 plugin.getMainConfig().getMaximumSelectedEntrancesPermission(),
                 plugin.getMainConfig().getDefaultMaximumSelectedEntrancesAmount()
+        );
+    }
+
+    /**
+     * Computes the maximum selection distance of the passed player.
+     *
+     * @param player Player to compute the maximum selection distance of.
+     * @return The maximum selection distance of the player.
+     */
+    public double computePlayerMaximumSelectionDistance(Player player) {
+        EntranceControl plugin = (EntranceControl) getPlugin();
+        return PermissionUtil.computePermissionValue(player,
+                plugin.getMainConfig().getMaximumSelectionDistancePermission(),
+                plugin.getMainConfig().getDefaultMaximumSelectionDistance()
         );
     }
 }

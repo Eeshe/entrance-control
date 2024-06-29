@@ -16,6 +16,9 @@ public class MainConfig extends ConfigWrapper {
     private static final String MAXIMUM_SELECTED_ENTRANCES_PATH = "maximum-selected-entrances";
     private static final String MAXIMUM_SELECTED_ENTRANCES_PERMISSION_PATH = MAXIMUM_SELECTED_ENTRANCES_PATH + ".permission";
     private static final String DEFAULT_MAXIMUM_SELECTED_ENTRANCES_AMOUNT_PATH = MAXIMUM_SELECTED_ENTRANCES_PATH + ".default";
+    private static final String MAXIMUM_SELECTION_DISTANCE_PATH = "maximum-selection-distance";
+    private static final String MAXIMUM_SELECTION_DISTANCE_PERMISSION_PATH = MAXIMUM_SELECTION_DISTANCE_PATH + ".permission";
+    private static final String DEFAULT_MAXIMUM_SELECTION_DISTANCE_PATH = MAXIMUM_SELECTION_DISTANCE_PATH + ".default";
     private static final String BREAK_PROTECTION_PATH = "break-protection";
 
 
@@ -55,10 +58,12 @@ public class MainConfig extends ConfigWrapper {
     private void writePermissionDefaults() {
         FileConfiguration config = getConfig();
 
-        config.addDefault(MAXIMUM_ENTRANCE_SELECTION_AMOUNT_PERMISSION_PATH, "entrancecontrol.maximum_entrance_selections");
+        config.addDefault(MAXIMUM_ENTRANCE_SELECTION_AMOUNT_PERMISSION_PATH, "entrancecontrol.maximum_entrance_selections.");
         config.addDefault(DEFAULT_MAXIMUM_ENTRANCE_SELECTION_AMOUNT_PATH, 10);
-        config.addDefault(MAXIMUM_SELECTED_ENTRANCES_PERMISSION_PATH, "entrancecontrol.maximum_selected_entrances");
+        config.addDefault(MAXIMUM_SELECTED_ENTRANCES_PERMISSION_PATH, "entrancecontrol.maximum_selected_entrances.");
         config.addDefault(DEFAULT_MAXIMUM_SELECTED_ENTRANCES_AMOUNT_PATH, 20);
+        config.addDefault(MAXIMUM_SELECTION_DISTANCE_PERMISSION_PATH, "entrancecontrol.maximum_selection_distance.");
+        config.addDefault(DEFAULT_MAXIMUM_SELECTION_DISTANCE_PATH, 20);
     }
 
     /**
@@ -122,6 +127,24 @@ public class MainConfig extends ConfigWrapper {
      */
     public int getDefaultMaximumSelectedEntrancesAmount() {
         return getConfig().getInt(DEFAULT_MAXIMUM_SELECTED_ENTRANCES_AMOUNT_PATH);
+    }
+
+    /**
+     * Retrieves the maximum selection distance permission from the configuration.
+     *
+     * @return the maximum selection distance permission as a string
+     */
+    public String getMaximumSelectionDistancePermission() {
+        return getConfig().getString(MAXIMUM_SELECTION_DISTANCE_PERMISSION_PATH);
+    }
+
+    /**
+     * Retrieves the default maximum selection distance from the configuration.
+     *
+     * @return the default maximum selection distance as an integer
+     */
+    public int getDefaultMaximumSelectionDistance() {
+        return getConfig().getInt(DEFAULT_MAXIMUM_SELECTION_DISTANCE_PATH);
     }
 
     /**

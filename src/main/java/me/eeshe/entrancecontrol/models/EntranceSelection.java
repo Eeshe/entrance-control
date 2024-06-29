@@ -349,7 +349,7 @@ public class EntranceSelection {
     public boolean canInteract(Player player) {
         if (player.hasPermission("entrancecontrol.admin")) return true;
 
-        return getMembers().contains(player.getUniqueId());
+        return isOwner(player) || getMembers().contains(player.getUniqueId());
     }
 
     /**

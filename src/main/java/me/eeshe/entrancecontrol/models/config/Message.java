@@ -25,8 +25,11 @@ public class Message extends PenMessage {
     public static final Message SELECTION_LIMIT_REACHED = new Message("selection-limit-reached", "&cYou can't create any more entrance selections.");
     public static final Message ALREADY_USED_ID = new Message("already-used-id", "&cYou are already using ID %id% in your entrance selections.");
     public static final Message ENTRANCE_SELECTION_INSTRUCTIONS = new Message("entrance-selection-instructions", "&eRight click to add entrances to the selection.\n&eLeft click to remove entrances from the selection.\n&eSneak to end the selection.");
+    public static final Message SELECTED_ENTRANCES_ACTION_BAR = new Message("selected-entrances-action-bar", "&7Selected entrances: &l%selected_entrances%/%maximum_entrances%");
     public static final Message ENTRANCE_SELECTION_END_CONFIRMATION = new Message("entrance-selection-end-confirmation", "&eSneak again to end the entrance selection.");
     public static final Message NO_SELECTED_ENTRANCES = new Message("no-selected-entrances", "&cYou didn't select any entrances.");
+    public static final Message EXCEEDED_SELECTION_AMOUNT = new Message("exceeded-selection-amount", "&cYou can't select any more entrances in this selection.");
+    public static final Message EXCEEDED_SELECTION_DISTANCE = new Message("exceeded-selection-distance", "&cYour selection exceeds your maximum selection distance &l(%maximum_distance%)&c.");
     public static final Message ENTRANCE_SELECTION_END = new Message("entrance-selection-end", "&aEnded entrance selection.");
 
     public static final Message MANAGER_COMMAND_INFO = new Message("manager-command-info", "Opens the entrance control manager menu.");
