@@ -55,6 +55,11 @@ public class Message extends PenMessage {
     public static final Message NOT_ENTRANCE_SELECTION = new Message("not-entrance-selection", "&cThis entrance is not locked");
     public static final Message ENTRANCE_IDENTIFY = new Message("entrance-identify", "&eThis entrance is part of selection &l%selection_name%&e owned by &l%selection_owner%&e.");
 
+    public static final Message DELETE_COMMAND_INFO = new Message("delete-command-info", "Deletes the specified selection from the indicated player.");
+    public static final Message DELETE_COMMAND_USAGE = new Message("delete-command-usage", "/entrancecontrol delete <Player> <SelectionID>");
+    public static final Message DELETE_COMMAND_SUCCESS_SENDER = new Message("delete-command-success-sender", "&aSuccessfully deleted &l%target%'s&a entrance selection &l%selection_name%&a.");
+    public static final Message DELETE_COMMAND_SUCCESS_TARGET = new Message("delete-command-success-target", "&cYour entrance selection &l%selection_name%&c has been deleted.");
+
     public static final Message ALREADY_SELECTED_ENTRANCE = new Message("already-selected-entrance", "&cThis entrance is already protected by a selection.");
     public static final Message NO_ENTRANCE_ACCESS = new Message("no-entrance-access", "&cYou don't have access to this entrance.");
     public static final Message PROTECTED_ENTRANCE_BREAK = new Message("protected-entrance-break", "&cThis entrance is protected.");

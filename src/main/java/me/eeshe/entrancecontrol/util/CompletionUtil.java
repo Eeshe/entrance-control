@@ -2,7 +2,7 @@ package me.eeshe.entrancecontrol.util;
 
 import me.eeshe.entrancecontrol.EntranceControl;
 import me.eeshe.entrancecontrol.models.EntranceSelection;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class CompletionUtil {
      * @param player Player to get the entrance selection names of.
      * @return The entrance selection names of the player.
      */
-    public static List<String> getPlayerEntranceSelectionNames(Player player) {
+    public static List<String> getPlayerEntranceSelectionNames(OfflinePlayer player) {
         return EntranceControl.getInstance().getEntranceSelectionManager().getPlayerEntranceSelections(player)
                 .stream().map(EntranceSelection::getDisplayName).toList();
     }

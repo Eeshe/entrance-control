@@ -115,7 +115,7 @@ public class EntranceSelection {
      * @param name  The name of the entrance selection.
      * @return The entrance selection with the passed name from the passed player owner.
      */
-    public static EntranceSelection fromName(Player owner, String name) {
+    public static EntranceSelection fromName(OfflinePlayer owner, String name) {
         for (EntranceSelection entranceSelection : EntranceControl.getInstance().getEntranceSelectionManager().getPlayerEntranceSelections(owner)) {
             if (!entranceSelection.getDisplayName().equals(name)) continue;
 
