@@ -1,0 +1,13 @@
+main: me.eeshe.entrancecontrol.EntranceControl
+name: EntranceControl
+version: ${project.version}
+author: Eeshe
+depend: [ PenPenLib ]
+api-version: 1.13
+folia-supported: true
+
+commands:
+  entrancecontrol:
+    aliases:
+      - ec
+      - entc
