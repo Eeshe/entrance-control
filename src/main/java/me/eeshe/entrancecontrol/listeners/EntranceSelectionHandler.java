@@ -28,9 +28,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -181,27 +180,6 @@ public class EntranceSelectionHandler implements Listener {
         entranceSelection.register();
         entranceSelection.stopHighlightTask(player);
         Message.ENTRANCE_SELECTION_END.send(player, true, CommonSound.SUCCESS, new HashMap<>());
-    }
-
-    /**
-     * Listens when a player breaks an entrance block and handles it.
-     *
-     * @param event BlockBreakEvent.
-     */
-    @EventHandler
-    public void onEntranceBreak(BlockBreakEvent event) {
-        if (event.isCancelled()) return;
-        if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
-
-        Block block = event.getBlock();
-        EntranceSelection entranceSelection = EntranceSelection.fromLocation(block.getLocation());
-        if (entranceSelection == null) return;
-        if (!entranceSelection.hasBreakProtection()) return;
-        Player player = event.getPlayer();
-        if (entranceSelection.canInteract(player)) return;
-
-        event.setCancelled(true);
-        Message.PROTECTED_ENTRANCE_BREAK.send(player, true, CommonSound.ERROR, new HashMap<>());
     }
 
     @EventHandler
@@ -424,5 +402,120 @@ public class EntranceSelectionHandler implements Listener {
             ));
         }
         MenuUtil.openSync(player, entranceSelection.createMembersMenu(1));
+    }
+
+    /**
+     * Listeners that handle the protection of EntranceSelections.
+     */
+
+    /**
+     * Listens when a player breaks an entrance block and handles it.
+     *
+     * @param event BlockBreakEvent.
+     */
+    @EventHandler
+    public void onEntranceBreak(BlockBreakEvent event) {
+        if (event.isCancelled()) return;
+        if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+
+        Block block = event.getBlock();
+        EntranceSelection entranceSelection = EntranceSelection.fromLocation(block.getLocation());
+        if (entranceSelection == null) return;
+        if (!entranceSelection.hasBreakProtection()) return;
+        Player player = event.getPlayer();
+        if (entranceSelection.canInteract(player)) return;
+
+        event.setCancelled(true);
+        Message.PROTECTED_ENTRANCE_BREAK.send(player, true, CommonSound.ERROR, new HashMap<>());
+    }
+
+    /**
+     * Listens when a block explodes an EntranceSelection block and handles it.
+     *
+     * @param event BlockExplodeEvent.
+     */
+    @EventHandler
+    public void onEntranceBlockExplode(BlockExplodeEvent event) {
+        if (event.isCancelled()) return;
+        if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+
+        removeEntranceSelectionBlocks(event.blockList());
+    }
+
+    /**
+     * Listens when an entity explodes an EntranceSelection block and handles it.
+     *
+     * @param event EntityExplodeEvent.
+     */
+    @EventHandler
+    public void onEntranceEntityExplode(EntityExplodeEvent event) {
+        if (event.isCancelled()) return;
+        if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+
+        removeEntranceSelectionBlocks(event.blockList());
+    }
+
+    /**
+     * Removes any EntranceSelection blocks found in the passed collection of blocks.
+     * <p>
+     * If the EntranceSelection doesn't have break protection, it won't be removed.
+     *
+     * @param blocks Collection of blocks.
+     */
+    private void removeEntranceSelectionBlocks(Collection<Block> blocks) {
+        Iterator<Block> blockIterator = blocks.iterator();
+        while (blockIterator.hasNext()) {
+            Block block = blockIterator.next();
+            EntranceSelection entranceSelection = EntranceSelection.fromLocation(block.getLocation());
+            if (entranceSelection == null) continue;
+            if (!entranceSelection.hasBreakProtection()) continue;
+
+            blockIterator.remove();
+        }
+    }
+
+    /**
+     * Listens when a piston pushes a group of blocks and cancels it if an EntranceSelection is pushed.
+     *
+     * @param event BlockPistonExtendEvent.
+     */
+    @EventHandler
+    public void onEntranceBlockPush(BlockPistonExtendEvent event) {
+        if (event.isCancelled()) return;
+        if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+        if (!containsEntranceSelection(event.getBlocks())) return;
+
+        event.setCancelled(true);
+    }
+
+    /**
+     * Listens when a piston retracts a group of blocks and cancels it if an EntranceSelection is retracted.
+     *
+     * @param event BlockPistonRetractEvent.
+     */
+    @EventHandler
+    public void onEntranceBlockPull(BlockPistonRetractEvent event) {
+        if (event.isCancelled()) return;
+        if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+        if (!containsEntranceSelection(event.getBlocks())) return;
+
+        event.setCancelled(true);
+    }
+
+    /**
+     * Checks if the passed list of blocks contains an EntranceSelection with break protection enabled.
+     *
+     * @param blocks Blocks to check.
+     * @return true if the list contains an EntranceSelection with break protection enabled, false otherwise.
+     */
+    private boolean containsEntranceSelection(Collection<Block> blocks) {
+        for (Block block : blocks) {
+            EntranceSelection entranceSelection = EntranceSelection.fromLocation(block.getLocation());
+            if (entranceSelection == null) continue;
+            if (!entranceSelection.hasBreakProtection()) continue;
+
+            return true;
+        }
+        return false;
     }
 }
