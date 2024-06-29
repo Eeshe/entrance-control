@@ -1,6 +1,9 @@
 package me.eeshe.entrancecontrol.listeners;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import me.eeshe.entrancecontrol.EntranceControl;
+import me.eeshe.entrancecontrol.files.config.MainConfig;
 import me.eeshe.entrancecontrol.inventories.EntranceSelectionManagerMenu;
 import me.eeshe.entrancecontrol.inventories.holders.EntranceSelectionManagerMenuHolder;
 import me.eeshe.entrancecontrol.inventories.holders.EntranceSelectionMembersMenuHolder;
@@ -16,10 +19,7 @@ import me.eeshe.penpenlib.util.InputUtil;
 import me.eeshe.penpenlib.util.LibMessager;
 import me.eeshe.penpenlib.util.MenuUtil;
 import me.eeshe.penpenlib.util.StringUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
@@ -90,10 +90,12 @@ public class EntranceSelectionHandler implements Listener {
      * @param event PlayerInteractEvent.
      */
     private void handleEntranceIdentification(PlayerInteractEvent event) {
-        event.setCancelled(true);
-
         Player player = event.getPlayer();
+        if (isBlacklistedWorld(player, player.getWorld(), true)) return;
         Block clickedBlock = event.getClickedBlock();
+        if (isBlacklistedRegion(player, clickedBlock.getLocation(), true)) return;
+
+        event.setCancelled(true);
         EntranceSelection entranceSelection = EntranceSelection.fromLocation(clickedBlock.getLocation());
         if (entranceSelection == null) {
             Message.NOT_ENTRANCE_SELECTION.sendError(player);
@@ -112,9 +114,11 @@ public class EntranceSelectionHandler implements Listener {
      */
     private void handleEntranceSelectionEdit(PlayerInteractEvent event) {
         event.setCancelled(true);
-
         Player player = event.getPlayer();
+        if (isBlacklistedWorld(player, player.getWorld(), true)) return;
         Block clickedBlock = event.getClickedBlock();
+        if (isBlacklistedRegion(player, clickedBlock.getLocation(), true)) return;
+
         EntranceSelection entranceSelection = plugin.getEntranceSelectionEditors().get(player.getUniqueId());
         Action action = event.getAction();
         Location clickedLocation = clickedBlock.getLocation();
@@ -164,12 +168,14 @@ public class EntranceSelectionHandler implements Listener {
      */
     private void handleEntranceInteraction(PlayerInteractEvent event) {
         if (event.useInteractedBlock() == Event.Result.DENY) return;
-
+        Player player = event.getPlayer();
+        if (isBlacklistedWorld(player, player.getWorld(), false)) return;
         Block clickedBlock = event.getClickedBlock();
+        if (isBlacklistedRegion(player, clickedBlock.getLocation(), false)) return;
+
         EntranceSelection entranceSelection = EntranceSelection.fromLocation(event.getClickedBlock().getLocation());
         if (entranceSelection == null) return;
 
-        Player player = event.getPlayer();
         if (!entranceSelection.canInteract(player)) {
             event.setCancelled(true);
             Message.NO_ENTRANCE_ACCESS.send(player, true, CommonSound.ERROR, new HashMap<>());
@@ -188,6 +194,9 @@ public class EntranceSelectionHandler implements Listener {
     @EventHandler
     public void onEntranceRedstone(BlockRedstoneEvent event) {
         Block block = event.getBlock();
+        if (isBlacklistedWorld(null, block.getWorld(), false)) return;
+        if (isBlacklistedRegion(null, block.getLocation(), false)) return;
+
         EntranceSelection entranceSelection = EntranceSelection.fromLocation(block.getLocation());
         if (entranceSelection == null) return;
         if (!entranceSelection.shouldSyncEntrances()) return;
@@ -217,9 +226,9 @@ public class EntranceSelectionHandler implements Listener {
     @EventHandler
     public void onPlayerSneak(PlayerToggleSneakEvent event) {
         if (event.isCancelled()) return;
+        Player player = event.getPlayer();
         if (!event.isSneaking()) return;
 
-        Player player = event.getPlayer();
         UUID playerUuid = player.getUniqueId();
         if (!plugin.getEntranceSelectionEditors().containsKey(playerUuid)) return;
         if (InputUtil.askPlayerConfirmation(player, Message.ENTRANCE_SELECTION_END_CONFIRMATION, editSelectionEndConfirmations))
@@ -547,6 +556,9 @@ public class EntranceSelectionHandler implements Listener {
         if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
 
         Block block = event.getBlock();
+        if (isBlacklistedWorld(null, block.getWorld(), false)) return;
+        if (isBlacklistedRegion(null, block.getLocation(), false)) return;
+
         EntranceSelection entranceSelection = EntranceSelection.fromLocation(block.getLocation());
         if (entranceSelection == null) return;
         if (!entranceSelection.hasBreakProtection()) return;
@@ -566,6 +578,9 @@ public class EntranceSelectionHandler implements Listener {
     public void onEntranceBlockExplode(BlockExplodeEvent event) {
         if (event.isCancelled()) return;
         if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+        Block block = event.getBlock();
+        if (isBlacklistedWorld(null, block.getWorld(), false)) return;
+        if (isBlacklistedRegion(null, block.getLocation(), false)) return;
 
         removeEntranceSelectionBlocks(event.blockList());
     }
@@ -579,6 +594,9 @@ public class EntranceSelectionHandler implements Listener {
     public void onEntranceEntityExplode(EntityExplodeEvent event) {
         if (event.isCancelled()) return;
         if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+        Location location = event.getLocation();
+        if (isBlacklistedWorld(null, location.getWorld(), false)) return;
+        if (isBlacklistedRegion(null, location, false)) return;
 
         removeEntranceSelectionBlocks(event.blockList());
     }
@@ -611,6 +629,9 @@ public class EntranceSelectionHandler implements Listener {
     public void onEntranceBlockPush(BlockPistonExtendEvent event) {
         if (event.isCancelled()) return;
         if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+        Block block = event.getBlock();
+        if (isBlacklistedWorld(null, block.getWorld(), false)) return;
+        if (isBlacklistedRegion(null, block.getLocation(), false)) return;
         if (!containsEntranceSelection(event.getBlocks())) return;
 
         event.setCancelled(true);
@@ -625,6 +646,9 @@ public class EntranceSelectionHandler implements Listener {
     public void onEntranceBlockPull(BlockPistonRetractEvent event) {
         if (event.isCancelled()) return;
         if (!plugin.getMainConfig().isBreakProtectionEnabled()) return;
+        Block block = event.getBlock();
+        if (isBlacklistedWorld(null, block.getWorld(), false)) return;
+        if (isBlacklistedRegion(null, block.getLocation(), false)) return;
         if (!containsEntranceSelection(event.getBlocks())) return;
 
         event.setCancelled(true);
@@ -645,5 +669,43 @@ public class EntranceSelectionHandler implements Listener {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Checks if the passed world is a blacklisted world.
+     *
+     * @param player Player to notify.
+     * @param world  World to check.
+     * @param notify True if the player should be notified, false otherwise.
+     * @return True if the passed world is a blacklisted world.
+     */
+    private boolean isBlacklistedWorld(Player player, World world, boolean notify) {
+        boolean isBlacklistedWorld = plugin.getMainConfig().isBlacklistedWorld(world);
+        if (!isBlacklistedWorld) return false;
+        if (player != null && notify) {
+            Message.BLACKLISTED_WORLD.sendError(player);
+        }
+        return true;
+    }
+
+    /**
+     * Checks if the passed location is a blacklisted region.
+     *
+     * @param player   Player to notify.
+     * @param location Location to check.
+     * @param notify   True if the player should be notified, false otherwise.
+     * @return True if the passed location is a blacklisted region.
+     */
+    private boolean isBlacklistedRegion(Player player, Location location, boolean notify) {
+        List<String> applicableRegions = WorldGuard.getInstance().getPlatform().getRegionContainer()
+                .get(BukkitAdapter.adapt(location.getWorld()))
+                .getApplicableRegionsIDs(BukkitAdapter.asBlockVector(location));
+        MainConfig mainConfig = plugin.getMainConfig();
+        boolean isBlacklistedRegion = applicableRegions.stream().anyMatch(mainConfig::isBlacklistedRegion);
+        if (!isBlacklistedRegion) return false;
+        if (player != null && notify) {
+            Message.BLACKLISTED_REGION.sendError(player);
+        }
+        return true;
     }
 }

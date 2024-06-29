@@ -14,6 +14,9 @@ public class Message extends PenMessage {
     private static final ConfigWrapper CONFIG_WRAPPER = new ConfigWrapper(EntranceControl.getInstance(), null, "messages.yml");
     private static final Map<String, PenMessage> PLACEHOLDERS = new HashMap<>();
 
+    public static final Message BLACKLISTED_WORLD = new Message("blacklisted-world", "&cEntranceControl can't be used in this world.");
+    public static final Message BLACKLISTED_REGION = new Message("blacklisted-region", "&cEntranceControl can't be used in this region.");
+
     public static final Message HELP_COMMAND_INFO = new Message("help-command-info", "Displays this list.");
     public static final Message HELP_COMMAND_USAGE = new Message("help-command-usage", "/entrancecontrol help");
 
