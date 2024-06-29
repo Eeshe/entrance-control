@@ -42,6 +42,7 @@ public class EntranceSelection {
     private UUID ownerUuid;
     private String displayName;
     private boolean syncEntrances;
+    private boolean isLocked;
     private boolean breakProtection;
 
     public EntranceSelection(Player player, String displayName) {
@@ -52,17 +53,19 @@ public class EntranceSelection {
         this.protectedEntrances = new HashSet<>();
         this.members = new ArrayList<>();
         this.syncEntrances = true;
+        this.isLocked = true;
         this.breakProtection = true;
     }
 
     public EntranceSelection(UUID uuid, Set<Location> protectedEntrances, List<UUID> members, UUID ownerUuid,
-                             String displayName, boolean syncEntrances, boolean breakProtection) {
+                             String displayName, boolean syncEntrances, boolean isLocked, boolean breakProtection) {
         this.uuid = uuid;
         this.protectedEntrances = protectedEntrances;
         this.members = members;
         this.ownerUuid = ownerUuid;
         this.displayName = displayName;
         this.syncEntrances = syncEntrances;
+        this.isLocked = isLocked;
         this.breakProtection = breakProtection;
     }
 
@@ -194,6 +197,7 @@ public class EntranceSelection {
         ConfigMenu configMenu = Menu.ENTRANCE_SELECTION_SETTINGS.fetch();
 
         String entranceSyncStatusString = Menu.ENTRANCE_SELECTION_SETTINGS.getAdditionalConfigString("entrance-sync-status." + syncEntrances);
+        String lockStatusString = Menu.ENTRANCE_SELECTION_SETTINGS.getAdditionalConfigString("lock-status." + isLocked);
         String breakProtectionStatusString = Menu.ENTRANCE_SELECTION_SETTINGS.getAdditionalConfigString("break-protection-status." + breakProtection);
         // Remove the protection toggle if entrance protection isn't enabled in the config
         List<MenuItem> menuItems = configMenu.getMenuItems();
@@ -203,6 +207,7 @@ public class EntranceSelection {
         return configMenu.createInventory(new EntranceSelectionSettingsMenuHolder(this), true,
                 true, true, true, Map.ofEntries(
                         Map.entry("%display_name%", displayName),
+                        Map.entry("%lock%", lockStatusString),
                         Map.entry("%entrance_sync%", entranceSyncStatusString),
                         Map.entry("%break_protection%", breakProtectionStatusString)
                 ));
@@ -349,18 +354,6 @@ public class EntranceSelection {
     }
 
     /**
-     * Checks if the passed player can interact with the entrance selection's entrances.
-     *
-     * @param player Player to check.
-     * @return True if the player can interact, false otherwise.
-     */
-    public boolean canInteract(Player player) {
-        if (player.hasPermission("entrancecontrol.admin")) return true;
-
-        return isOwner(player) || getMembers().contains(player.getUniqueId());
-    }
-
-    /**
      * Checks if the passed player is a member of the entrance selection.
      *
      * @param player Player to check.
@@ -418,10 +411,6 @@ public class EntranceSelection {
         saveData();
     }
 
-    public void setOwnerUuid(UUID ownerUuid) {
-        this.ownerUuid = ownerUuid;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
@@ -440,8 +429,37 @@ public class EntranceSelection {
         saveData();
     }
 
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
+        saveData();
+    }
+
+    /**
+     * Checks if the passed player can interact with the entrance selection's entrances.
+     *
+     * @param player Player to check.
+     * @return True if the player can interact, false otherwise.
+     */
+    public boolean canInteract(Player player) {
+        if (!isLocked) return true;
+        if (player.hasPermission("entrancecontrol.bypass.lock")) return true;
+
+        return isOwner(player) || isMember(player);
+    }
+
     public boolean hasBreakProtection() {
         return breakProtection;
+    }
+
+    public boolean canBreak(Player player) {
+        if (!hasBreakProtection()) return true;
+        if (player.hasPermission("entrancecontrol.bypass.protection")) return true;
+
+        return isOwner(player) || isMember(player);
     }
 
     public void setBreakProtection(boolean breakProtection) {

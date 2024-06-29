@@ -25,6 +25,8 @@ public class Sound extends PenSound {
     public static final Sound ENTRANCE_SYNC_OFF = new Sound("entrance-sync-off", true, org.bukkit.Sound.UI_BUTTON_CLICK, 1.0F, 0.5F);
     public static final Sound BREAK_PROTECTION_ON = new Sound("break-protection-on", true, org.bukkit.Sound.UI_BUTTON_CLICK, 1.0F, 1.5F);
     public static final Sound BREAK_PROTECTION_OFF = new Sound("break-protection-off", true, org.bukkit.Sound.UI_BUTTON_CLICK, 1.0F, 0.5F);
+    public static final Sound LOCK_ON = new Sound("lock-on", true, org.bukkit.Sound.UI_BUTTON_CLICK, 1.0F, 1.5F);
+    public static final Sound LOCK_OFF = new Sound("lock-off", true, org.bukkit.Sound.UI_BUTTON_CLICK, 1.0F, 0.5F);
     public static final Sound ENTRANCE_SELECTION_DELETE = new Sound("entrance-selection-delete", true, org.bukkit.Sound.BLOCK_GRAVEL_BREAK, 1.0F, 1.3F);
 
     public static final Sound ENTRANCE_IDENTIFY = new Sound("entrance-identify", true, org.bukkit.Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0F, 1.2F);

@@ -323,6 +323,11 @@ public class EntranceSelectionHandler implements Listener {
                 player.openInventory(entranceSelection.createSettingsMenu());
                 (entranceSelection.shouldSyncEntrances() ? Sound.ENTRANCE_SYNC_ON : Sound.ENTRANCE_SYNC_OFF).play(player);
             }
+            case "lock" -> {
+                entranceSelection.setLocked(!entranceSelection.isLocked());
+                player.openInventory(entranceSelection.createSettingsMenu());
+                (entranceSelection.isLocked() ? Sound.LOCK_ON : Sound.LOCK_OFF).play(player);
+            }
             case "break-protection" -> {
                 entranceSelection.setBreakProtection(!entranceSelection.hasBreakProtection());
                 player.openInventory(entranceSelection.createSettingsMenu());
@@ -409,6 +414,7 @@ public class EntranceSelectionHandler implements Listener {
             return;
         }
         entranceSelection.transferOwnership(target);
+        player.openInventory(EntranceSelectionManagerMenu.create(player, 1));
         Message.ENTRANCE_SELECTION_TRANSFER_SUCCESS_SELF.sendSuccess(player, Map.ofEntries(
                 Map.entry("%display_name%", entranceSelection.getDisplayName()),
                 Map.entry("%target%", onlineTarget.getName())
@@ -545,7 +551,7 @@ public class EntranceSelectionHandler implements Listener {
         if (entranceSelection == null) return;
         if (!entranceSelection.hasBreakProtection()) return;
         Player player = event.getPlayer();
-        if (entranceSelection.canInteract(player)) return;
+        if (entranceSelection.canBreak(player)) return;
 
         event.setCancelled(true);
         Message.PROTECTED_ENTRANCE_BREAK.send(player, true, CommonSound.ERROR, new HashMap<>());

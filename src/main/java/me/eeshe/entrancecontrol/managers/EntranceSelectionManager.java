@@ -59,9 +59,10 @@ public class EntranceSelectionManager extends DataManager {
         UUID ownerUuid = UUID.fromString(selectionData.getString("owner-uuid", ""));
         String displayName = selectionData.getString("display-name", "");
         boolean syncEntrances = selectionData.getBoolean("sync-entrances", true);
+        boolean isLocked = selectionData.getBoolean("locked", true);
         boolean breakProtection = selectionData.getBoolean("break-protection", true);
 
-        return new EntranceSelection(uuid, protectedEntrances, members, ownerUuid, displayName, syncEntrances, breakProtection);
+        return new EntranceSelection(uuid, protectedEntrances, members, ownerUuid, displayName, syncEntrances, isLocked, breakProtection);
     }
 
 
@@ -94,6 +95,7 @@ public class EntranceSelectionManager extends DataManager {
         selectionData.set("owner-uuid", entranceSelection.getOwnerUuid().toString());
         selectionData.set("display-name", entranceSelection.getDisplayName());
         selectionData.set("sync-entrances", entranceSelection.shouldSyncEntrances());
+        selectionData.set("locked", entranceSelection.isLocked());
         selectionData.set("break-protection", entranceSelection.hasBreakProtection());
 
         entranceSelectionFile.save();

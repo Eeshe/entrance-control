@@ -71,6 +71,14 @@ public class Menu extends PenMenu {
                                     "&7Click here to enable or disable entrance syncing."
                             )
                     ), 12),
+                    new MenuItem("lock", ItemUtil.generateItemStack(
+                            Material.IRON_DOOR,
+                            "&eLock",
+                            List.of(
+                                    "%lock%",
+                                    "&7Click here to enable or disable entrance locking."
+                            )
+                    ), 13),
                     new MenuItem("break-protection", ItemUtil.generateItemStack(
                             Material.GOLDEN_PICKAXE,
                             "&eBreak Protection",
@@ -78,17 +86,17 @@ public class Menu extends PenMenu {
                                     "%break_protection%",
                                     "&7Click here to enable or disable break protection."
                             )
-                    ), 13),
+                    ), 14),
                     new MenuItem("members", ItemUtil.generateItemStack(
                             Material.PLAYER_HEAD,
                             "&eMembers",
                             List.of("&7Click here to manage members.")
-                    ), 14),
+                    ), 15),
                     new MenuItem("edit-selection", ItemUtil.generateItemStack(
                             Material.WRITABLE_BOOK,
                             "&eEdit Selection",
                             List.of("&7Click here to edit the selected entrances")
-                    ), 15),
+                    ), 16),
                     new MenuItem("delete", ItemUtil.generateItemStack(
                             Material.BARRIER,
                             "&cDelete"
@@ -96,6 +104,10 @@ public class Menu extends PenMenu {
             ),
             Map.ofEntries(
                     Map.entry("entrance-sync-status", Map.ofEntries(
+                            Map.entry(true, "&aEnabled"),
+                            Map.entry(false, "&cDisabled")
+                    )),
+                    Map.entry("lock-status", Map.ofEntries(
                             Map.entry(true, "&aEnabled"),
                             Map.entry(false, "&cDisabled")
                     )),
