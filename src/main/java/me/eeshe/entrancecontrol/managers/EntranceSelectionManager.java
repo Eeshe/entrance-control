@@ -129,13 +129,14 @@ public class EntranceSelectionManager extends DataManager {
      * @return The entrance selections of the player.
      */
     public List<EntranceSelection> getPlayerEntranceSelections(OfflinePlayer player) {
-        List<EntranceSelection> playerEntranceSelections = new ArrayList<>();
+        // Use a TreeMap to sort alphabetically
+        Map<String, EntranceSelection> playerEntranceSelections = new TreeMap<>();
         for (EntranceSelection entranceSelection : entranceSelections.values()) {
             if (!entranceSelection.isOwner(player)) continue;
 
-            playerEntranceSelections.add(entranceSelection);
+            playerEntranceSelections.put(entranceSelection.getDisplayName(), entranceSelection);
         }
-        return playerEntranceSelections;
+        return new ArrayList<>(playerEntranceSelections.values());
     }
 
     /**

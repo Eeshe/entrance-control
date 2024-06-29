@@ -25,6 +25,7 @@ public class EntranceControl extends JavaPlugin implements PenPenPlugin {
     private final List<DataManager> dataManagers = new ArrayList<>();
 
     private final Map<UUID, EntranceSelection> entranceSelectionEditors = new HashMap<>();
+    private final Set<UUID> entranceIdentifiers = new HashSet<>();
 
     private MainConfig mainConfig;
 
@@ -130,12 +131,16 @@ public class EntranceControl extends JavaPlugin implements PenPenPlugin {
         return this;
     }
 
+    public MainConfig getMainConfig() {
+        return mainConfig;
+    }
+
     public Map<UUID, EntranceSelection> getEntranceSelectionEditors() {
         return entranceSelectionEditors;
     }
 
-    public MainConfig getMainConfig() {
-        return mainConfig;
+    public Set<UUID> getEntranceIdentifiers() {
+        return entranceIdentifiers;
     }
 
     public EntranceSelectionManager getEntranceSelectionManager() {

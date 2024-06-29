@@ -8,15 +8,16 @@ import me.eeshe.entrancecontrol.models.config.Particle;
 import me.eeshe.entrancecontrol.util.BlockOutlineUtil;
 import me.eeshe.penpenlib.models.Scheduler;
 import me.eeshe.penpenlib.models.config.ConfigMenu;
+import me.eeshe.penpenlib.models.config.MenuItem;
 import me.eeshe.penpenlib.util.ItemUtil;
 import me.eeshe.penpenlib.util.MenuUtil;
 import me.eeshe.penpenlib.util.PlaceholderUtil;
+import me.eeshe.penpenlib.util.StringUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Openable;
 import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Gate;
@@ -46,7 +47,7 @@ public class EntranceSelection {
     public EntranceSelection(Player player, String displayName) {
         this.uuid = UUID.randomUUID();
         this.ownerUuid = player.getUniqueId();
-        this.displayName = displayName;
+        this.displayName = ChatColor.stripColor(StringUtil.formatColor(displayName)); // Remove any inputted color
 
         this.protectedEntrances = new HashSet<>();
         this.members = new ArrayList<>();
@@ -194,6 +195,11 @@ public class EntranceSelection {
 
         String entranceSyncStatusString = Menu.ENTRANCE_SELECTION_SETTINGS.getAdditionalConfigString("entrance-sync-status." + syncEntrances);
         String breakProtectionStatusString = Menu.ENTRANCE_SELECTION_SETTINGS.getAdditionalConfigString("break-protection-status." + breakProtection);
+        // Remove the protection toggle if entrance protection isn't enabled in the config
+        List<MenuItem> menuItems = configMenu.getMenuItems();
+        menuItems.removeIf(menuItem -> menuItem.getId().equals("break-protection")
+                && !EntranceControl.getInstance().getMainConfig().isBreakProtectionEnabled());
+
         return configMenu.createInventory(new EntranceSelectionSettingsMenuHolder(this), true,
                 true, true, true, Map.ofEntries(
                         Map.entry("%display_name%", displayName),
@@ -210,11 +216,13 @@ public class EntranceSelection {
      */
     public Inventory createMembersMenu(int page) {
         ConfigMenu configMenu = Menu.ENTRANCE_SELECTION_MEMBERS.fetch();
+        int membersSize = Math.max(1, members.size()); // Ensure at least 1 member to avoid a 2 row inventory
         Inventory inventory = configMenu.createInventory(new EntranceSelectionMembersMenuHolder(this, page),
-                members.size(), page, true, false, true, true,
+                membersSize, page, true, false, true, true,
                 Map.of("%display_name%", displayName));
 
         addMemberItems(configMenu, inventory, page);
+        MenuUtil.placeFillerItems(configMenu, inventory);
 
         return inventory;
     }
@@ -419,7 +427,7 @@ public class EntranceSelection {
     }
 
     public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+        this.displayName = ChatColor.stripColor(StringUtil.formatColor(displayName)); // Remove any inputted color
         saveData();
     }
 

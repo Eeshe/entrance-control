@@ -17,6 +17,7 @@ public class CommandEntranceControl extends PenCommand {
                 new CommandManager(plugin, this),
                 new CommandOpen(plugin, this),
                 new CommandClose(plugin, this),
+                new CommandIdentify(plugin, this),
                 new CommandReload(plugin, this),
                 new CommandHelp(plugin, this)
         ));

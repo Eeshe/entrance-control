@@ -9,7 +9,9 @@ import me.eeshe.penpenlib.models.config.CommonSound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class CommandLock extends PenCommand {
 
@@ -20,8 +22,9 @@ public class CommandLock extends PenCommand {
         setPermission("entrancecontrol.lock");
         setInfoMessage(Message.LOCK_COMMAND_INFO);
         setUsageMessage(Message.LOCK_COMMAND_USAGE);
-        setArgumentAmount(1);
+        setArgumentAmount(0);
         setPlayerCommand(true);
+        setCompletions(Map.of(0, (sender, strings) -> List.of("[SelectionID]")));
     }
 
     @Override
@@ -35,7 +38,7 @@ public class CommandLock extends PenCommand {
             Message.SELECTION_LIMIT_REACHED.sendError(player);
             return;
         }
-        String displayName = args[0];
+        String displayName = args.length == 0 ? String.valueOf(ThreadLocalRandom.current().nextInt(999999999)) : args[0];
         if (EntranceSelection.fromName(player, displayName) != null) {
             Message.ALREADY_USED_ID.sendError(player, Map.of("%id%", displayName));
             return;

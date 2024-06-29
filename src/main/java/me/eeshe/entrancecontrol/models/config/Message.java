@@ -23,7 +23,8 @@ public class Message extends PenMessage {
     public static final Message LOCK_COMMAND_INFO = new Message("lock-command-info", "Starts an entrance selection creation session.");
     public static final Message LOCK_COMMAND_USAGE = new Message("lock-command-usage", "/entrancecontrol lock <SelectionID>");
     public static final Message SELECTION_LIMIT_REACHED = new Message("selection-limit-reached", "&cYou can't create any more entrance selections.");
-    public static final Message ALREADY_USED_ID = new Message("already-used-id", "&cYou are already using ID %id% in your entrance selections.");
+    public static final Message ALREADY_USED_ID = new Message("already-used-id", "&cYou are already using ID &l%id% in your entrance selections.");
+    public static final Message ENTRANCE_SELECTION_NAME_INSTRUCTIONS = new Message("entrance-selection-name-instructions", "&eEnter the new name of the entrance selection as a chat message.\n&eEnter &ocancel&e to cancel the operation.");
     public static final Message ENTRANCE_SELECTION_INSTRUCTIONS = new Message("entrance-selection-instructions", "&eRight click to add entrances to the selection.\n&eLeft click to remove entrances from the selection.\n&eSneak to end the selection.");
     public static final Message SELECTED_ENTRANCES_ACTION_BAR = new Message("selected-entrances-action-bar", "&7Selected entrances: &l%selected_entrances%/%maximum_entrances%");
     public static final Message ENTRANCE_SELECTION_END_CONFIRMATION = new Message("entrance-selection-end-confirmation", "&eSneak again to end the entrance selection.");
@@ -44,11 +45,18 @@ public class Message extends PenMessage {
     public static final Message CLOSE_COMMAND_USAGE = new Message("close-command-usage", "/entrancecontrol close <SelectionID");
     public static final Message CLOSE_COMMAND_SUCCESS = new Message("close-command-success", "&aSuccessfully closed all entrances from &l%name%&a.");
 
+    public static final Message IDENTIFY_COMMAND_INFO = new Message("identify-command-info", "Shows information about the clicked entrances.");
+    public static final Message IDENTIFY_COMMAND_USAGE = new Message("identify-command-usage", "/entrancecontrol identify");
+    public static final Message IDENTIFY_COMMAND_START = new Message("identify-command-start", "&aRight click the entrance you wish to identify.");
+    public static final Message IDENTIFY_COMMAND_STOP = new Message("identify-command-stop", "&cYou are no longer identifying entrances.");
+    public static final Message NOT_ENTRANCE_SELECTION = new Message("not-entrance-selection", "&cThis entrance is not locked");
+    public static final Message ENTRANCE_IDENTIFY = new Message("entrance-identify", "&eThis entrance is part of selection &l%selection_name%&e owned by &l%selection_owner%&e.");
+
     public static final Message ALREADY_SELECTED_ENTRANCE = new Message("already-selected-entrance", "&cThis entrance is already protected by a selection.");
     public static final Message NO_ENTRANCE_ACCESS = new Message("no-entrance-access", "&cYou don't have access to this entrance.");
     public static final Message PROTECTED_ENTRANCE_BREAK = new Message("protected-entrance-break", "&cThis entrance is protected.");
 
-    public static final Message ENTRANCE_SELECTION_ADD_MEMBER_INSTRUCTIONS = new Message("entrance-selection-add-member-instructions", "&eEnter the name of the player you wish to add to the selection as a chat message.\bEnter &ocancel&e to cancel the operation.");
+    public static final Message ENTRANCE_SELECTION_ADD_MEMBER_INSTRUCTIONS = new Message("entrance-selection-add-member-instructions", "&eEnter the name of the player you wish to add to the selection as a chat message.\n&eEnter &ocancel&e to cancel the operation.");
     public static final Message ENTRANCE_SELECTION_ADD_MEMBER_CANCEL = new Message("entrance-selection-add-member-cancel", "&cCancelled member add.");
     public static final Message ALREADY_MEMBER = new Message("already-member", "&c&l%target%&c is already a member of this entrance selection.");
     public static final Message ENTRANCE_SELECTION_ADD_MEMBER_SUCCESS_SELF = new Message("entrance-selection-add-member-success-self", "&aSuccessfully added &l%target%&a to &l%display_name%&a's entrance selection.");

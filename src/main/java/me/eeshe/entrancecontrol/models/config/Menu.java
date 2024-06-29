@@ -55,6 +55,14 @@ public class Menu extends PenMenu {
                     "&cBack"
             ), 1),
             List.of(
+                    new MenuItem("name", ItemUtil.generateItemStack(
+                            Material.NAME_TAG,
+                            "&eName",
+                            List.of(
+                                    "&f%display_name%",
+                                    "&7Click here to change the name of the entrance selection."
+                            )
+                    ), 11),
                     new MenuItem("entrance-sync", ItemUtil.generateItemStack(
                             Material.OBSERVER,
                             "&eEntrance Sync",
@@ -62,7 +70,7 @@ public class Menu extends PenMenu {
                                     "%entrance_sync%",
                                     "&7Click here to enable or disable entrance syncing."
                             )
-                    ), 11),
+                    ), 12),
                     new MenuItem("break-protection", ItemUtil.generateItemStack(
                             Material.GOLDEN_PICKAXE,
                             "&eBreak Protection",
@@ -70,17 +78,17 @@ public class Menu extends PenMenu {
                                     "%break_protection%",
                                     "&7Click here to enable or disable break protection."
                             )
-                    ), 12),
+                    ), 13),
                     new MenuItem("members", ItemUtil.generateItemStack(
                             Material.PLAYER_HEAD,
                             "&eMembers",
                             List.of("&7Click here to manage members.")
-                    ), 13),
+                    ), 14),
                     new MenuItem("edit-selection", ItemUtil.generateItemStack(
                             Material.WRITABLE_BOOK,
                             "&eEdit Selection",
                             List.of("&7Click here to edit the selected entrances")
-                    ), 14),
+                    ), 15),
                     new MenuItem("delete", ItemUtil.generateItemStack(
                             Material.BARRIER,
                             "&cDelete"

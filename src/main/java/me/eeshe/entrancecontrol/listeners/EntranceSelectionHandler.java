@@ -9,7 +9,6 @@ import me.eeshe.entrancecontrol.managers.EntranceSelectionManager;
 import me.eeshe.entrancecontrol.models.EntranceSelection;
 import me.eeshe.entrancecontrol.models.config.Message;
 import me.eeshe.entrancecontrol.models.config.Sound;
-import me.eeshe.entrancecontrol.util.LogUtil;
 import me.eeshe.penpenlib.models.Scheduler;
 import me.eeshe.penpenlib.models.config.CommonSound;
 import me.eeshe.penpenlib.models.config.MenuItem;
@@ -44,6 +43,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.util.*;
 
 public class EntranceSelectionHandler implements Listener {
+    private final Map<UUID, EntranceSelection> selectionNameEditors = new HashMap<>();
     private final Map<UUID, EntranceSelection> selectionMemberAdders = new HashMap<>();
     private final Set<UUID> editSelectionEndConfirmations = new HashSet<>();
     private final Set<UUID> selectionDeleteConfirmations = new HashSet<>();
@@ -68,13 +68,41 @@ public class EntranceSelectionHandler implements Listener {
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock == null) return;
         if (!(clickedBlock.getBlockData() instanceof Openable)) return;
-        if (plugin.getEntranceSelectionEditors().containsKey(event.getPlayer().getUniqueId())) {
+
+        UUID playerUuid = event.getPlayer().getUniqueId();
+        if (plugin.getEntranceIdentifiers().contains(playerUuid)) {
+            handleEntranceIdentification(event);
+            return;
+        }
+        if (plugin.getEntranceSelectionEditors().containsKey(playerUuid)) {
             // Player is editing an entrance selection
             handleEntranceSelectionEdit(event);
+            return;
         }
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         handleEntranceInteraction(event);
+    }
+
+    /**
+     * Handles the identification of the clicked entrance.
+     *
+     * @param event PlayerInteractEvent.
+     */
+    private void handleEntranceIdentification(PlayerInteractEvent event) {
+        event.setCancelled(true);
+
+        Player player = event.getPlayer();
+        Block clickedBlock = event.getClickedBlock();
+        EntranceSelection entranceSelection = EntranceSelection.fromLocation(clickedBlock.getLocation());
+        if (entranceSelection == null) {
+            Message.NOT_ENTRANCE_SELECTION.sendError(player);
+            return;
+        }
+        Message.ENTRANCE_IDENTIFY.send(player, Sound.ENTRANCE_IDENTIFY, Map.ofEntries(
+                Map.entry("%selection_name%", entranceSelection.getDisplayName()),
+                Map.entry("%selection_owner%", entranceSelection.getOwner().getName())
+        ));
     }
 
     /**
@@ -285,6 +313,11 @@ public class EntranceSelectionHandler implements Listener {
 
         EntranceSelection entranceSelection = ((EntranceSelectionSettingsMenuHolder) event.getInventory().getHolder()).entranceSelection();
         switch (menuAction) {
+            case "name" -> {
+                selectionNameEditors.put(player.getUniqueId(), entranceSelection);
+                player.closeInventory();
+                Message.ENTRANCE_SELECTION_NAME_INSTRUCTIONS.send(player, CommonSound.INPUT_REQUEST);
+            }
             case "entrance-sync" -> {
                 entranceSelection.setSyncEntrances(!entranceSelection.shouldSyncEntrances());
                 player.openInventory(entranceSelection.createSettingsMenu());
@@ -349,8 +382,7 @@ public class EntranceSelectionHandler implements Listener {
             }
         } else if (menuAction.equals("add-member")) {
             selectionMemberAdders.put(player.getUniqueId(), entranceSelection);
-//            Message.ENTRANCE_SELECTION_ADD_MEMBER_INSTRUCTIONS.sendSuccess(player);
-//            Message.ENTRANCE_SELECTION_ADD_MEMBER_INSTRUCTIONS.send(player, CommonSound.INPUT_REQUEST);
+            Message.ENTRANCE_SELECTION_ADD_MEMBER_INSTRUCTIONS.send(player, CommonSound.INPUT_REQUEST);
             player.closeInventory();
         }
     }
@@ -421,15 +453,55 @@ public class EntranceSelectionHandler implements Listener {
 
         Player player = event.getPlayer();
         UUID playerUuid = player.getUniqueId();
-        if (!selectionMemberAdders.containsKey(playerUuid)) return;
-
+        String message = event.getMessage().trim();
+        if (selectionNameEditors.containsKey(playerUuid)) {
+            handleSelectionNameInput(player, message);
+        } else if (selectionMemberAdders.containsKey(playerUuid)) {
+            handleSelectionMemberAddInput(player, message);
+        } else {
+            return;
+        }
         event.setCancelled(true);
-        EntranceSelection entranceSelection = selectionMemberAdders.get(playerUuid);
-        String targetName = event.getMessage().trim();
-        if (InputUtil.attemptInputCancel(player, targetName, Message.ENTRANCE_SELECTION_ADD_MEMBER_CANCEL, selectionMemberAdders,
+    }
+
+    /**
+     * Handles the input of the name of an entrance selection.
+     *
+     * @param player Player making the input.
+     * @param input  Input message.
+     */
+    private void handleSelectionNameInput(Player player, String input) {
+        UUID playerUuid = player.getUniqueId();
+        EntranceSelection entranceSelection = selectionNameEditors.get(playerUuid);
+        if (InputUtil.attemptInputCancel(player, input, Message.ENTRANCE_SELECTION_ADD_MEMBER_CANCEL, selectionNameEditors,
                 () -> MenuUtil.openSync(player, entranceSelection.createMembersMenu(1)))) {
             return;
         }
+        String newSelectionName = input.trim();
+        if (EntranceSelection.fromName(player, newSelectionName) != null) {
+            Message.ALREADY_USED_ID.sendError(player, Map.of("%id%", newSelectionName));
+            return;
+        }
+        selectionMemberAdders.remove(playerUuid);
+        entranceSelection.setDisplayName(newSelectionName);
+        MenuUtil.openSync(player, entranceSelection.createSettingsMenu());
+        CommonSound.SUCCESS.play(player);
+    }
+
+    /**
+     * Handles the input of a new member for an entrance selection.
+     *
+     * @param player Player making the input.
+     * @param input  Input message.
+     */
+    private void handleSelectionMemberAddInput(Player player, String input) {
+        UUID playerUuid = player.getUniqueId();
+        EntranceSelection entranceSelection = selectionMemberAdders.get(playerUuid);
+        if (InputUtil.attemptInputCancel(player, input, Message.ENTRANCE_SELECTION_ADD_MEMBER_CANCEL, selectionMemberAdders,
+                () -> MenuUtil.openSync(player, entranceSelection.createMembersMenu(1)))) {
+            return;
+        }
+        String targetName = input.trim();
         OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
         if (!target.hasPlayedBefore()) {
             LibMessager.sendPlayerNotFoundMessage(player, targetName);
