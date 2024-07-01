@@ -35,6 +35,13 @@ public class MainConfig extends ConfigWrapper {
         getConfig().options().copyDefaults(true);
         saveConfig();
         reloadConfig();
+
+        // Comments need to be written after the default config is written
+        writeComments();
+
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+        reloadConfig();
     }
 
     /**
@@ -60,8 +67,10 @@ public class MainConfig extends ConfigWrapper {
 
         config.addDefault(MAXIMUM_ENTRANCE_SELECTION_AMOUNT_PERMISSION_PATH, "entrancecontrol.maximum_entrance_selections.");
         config.addDefault(DEFAULT_MAXIMUM_ENTRANCE_SELECTION_AMOUNT_PATH, 10);
+
         config.addDefault(MAXIMUM_SELECTED_ENTRANCES_PERMISSION_PATH, "entrancecontrol.maximum_selected_entrances.");
         config.addDefault(DEFAULT_MAXIMUM_SELECTED_ENTRANCES_AMOUNT_PATH, 20);
+
         config.addDefault(MAXIMUM_SELECTION_DISTANCE_PERMISSION_PATH, "entrancecontrol.maximum_selection_distance.");
         config.addDefault(DEFAULT_MAXIMUM_SELECTION_DISTANCE_PATH, 20);
     }
@@ -70,7 +79,40 @@ public class MainConfig extends ConfigWrapper {
      * Writes the default configurations for general settings.
      */
     private void writeGeneralDefaults() {
-        getConfig().addDefault(BREAK_PROTECTION_PATH, true);
+        FileConfiguration config = getConfig();
+
+        config.addDefault(BREAK_PROTECTION_PATH, true);
+    }
+
+    private void writeComments() {
+        FileConfiguration config = getConfig();
+
+        config.setComments(WORLD_BLACKLIST_PATH, List.of(
+                "Worlds where EntranceControl won't handle events in."
+        ));
+        config.setComments(REGION_BLACKLIST_PATH, List.of(
+                "WorldGuard regions where EntranceControl won't handle events in."
+        ));
+
+        config.setComments(MAXIMUM_ENTRANCE_SELECTION_AMOUNT_PATH, List.of(
+                "Permission that will be checked when computing the total amount of entrance selections a player can have.",
+                "Ex. 'entrancecontrol.maximum_entrance_selections.' will allow a player that has the permission 'entrancecontrol.maximum_entrance_selections.10' to have 10 entrance selections.",
+                "The default amount will be used if the player doesn't have the configured permission."
+        ));
+        config.setComments(MAXIMUM_SELECTED_ENTRANCES_PATH, List.of(
+                "Permission that will be checked when computing the total amount of entrance a player can select within an entrance selection.",
+                "Ex. 'entrancecontrol.maximum_selected_entrances.' will allow a player that has the permission 'entrancecontrol.maximum_selected_entrances.10' to select 10 entrances in their selection.",
+                "The default amount will be used if the player doesn't have the configured permission."
+        ));
+        config.setComments(MAXIMUM_SELECTION_DISTANCE_PATH, List.of(
+                "Permission that will be checked when computing the total distance an entrance selection can have between their entrances.",
+                "Ex. 'entrancecontrol.maximum_selection_distance.' will allow a player that has the permission 'entrancecontrol.maximum_selection_distance.10' to have a total distance of 10 blocks between the entrances in their selection.",
+                "The default amount will be used if the player doesn't have the configured permission."
+        ));
+
+        config.setComments(BREAK_PROTECTION_PATH, List.of(
+                "Whether break protection will be handled by the plugin."
+        ));
     }
 
     /**
