@@ -11,6 +11,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
 public class CommandDelete extends PenCommand {
@@ -44,7 +45,7 @@ public class CommandDelete extends PenCommand {
             LibMessager.sendPlayerNotFoundMessage(sender, targetName);
             return;
         }
-        String entranceSelectionId = args[1];
+        String entranceSelectionId = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         EntranceSelection entranceSelection = EntranceSelection.fromName(target, entranceSelectionId);
         if (entranceSelection == null) {
             Message.ENTRANCE_SELECTION_NOT_FOUND.sendError(sender, Map.of("%name%", entranceSelectionId));
