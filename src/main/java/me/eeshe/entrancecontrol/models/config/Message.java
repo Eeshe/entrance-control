@@ -28,6 +28,7 @@ public class Message extends PenMessage {
     public static final Message SELECTION_LIMIT_REACHED = new Message("selection-limit-reached", "&cYou can't create any more entrance selections.");
     public static final Message ALREADY_USED_ID = new Message("already-used-id", "&cYou are already using ID &l%id% in your entrance selections.");
     public static final Message ENTRANCE_SELECTION_NAME_INSTRUCTIONS = new Message("entrance-selection-name-instructions", "&eEnter the new name of the entrance selection as a chat message.\n&eEnter &ocancel&e to cancel the operation.");
+    public static final Message ENTRANCE_SELECTION_NAME_INPUT_CANCEL = new Message("entrance-selection-name-input-cancel", "&cCancelled name change.");
     public static final Message ENTRANCE_SELECTION_INSTRUCTIONS = new Message("entrance-selection-instructions", "&eRight click to add entrances to the selection.\n&eLeft click to remove entrances from the selection.\n&eSneak to end the selection.");
     public static final Message SELECTED_ENTRANCES_ACTION_BAR = new Message("selected-entrances-action-bar", "&7Selected entrances: &l%selected_entrances%/%maximum_entrances%");
     public static final Message ENTRANCE_SELECTION_END_CONFIRMATION = new Message("entrance-selection-end-confirmation", "&eSneak again to end the entrance selection.");

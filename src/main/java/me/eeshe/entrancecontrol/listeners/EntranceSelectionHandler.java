@@ -24,6 +24,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Openable;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.block.data.type.Gate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -127,8 +128,9 @@ public class EntranceSelectionHandler implements Listener {
                 Message.ALREADY_SELECTED_ENTRANCE.sendError(player);
                 return;
             }
+            int newSelectedAmount = clickedBlock.getBlockData() instanceof Door ? 2 : 1;
             int playerMaximumSelectedEntrances = plugin.getEntranceSelectionManager().computePlayerSelectedEntrancesLimit(player);
-            if (entranceSelection.getProtectedEntrances().size() >= playerMaximumSelectedEntrances) {
+            if (entranceSelection.getProtectedEntrances().size() + newSelectedAmount > playerMaximumSelectedEntrances) {
                 Message.EXCEEDED_SELECTION_AMOUNT.sendError(player);
                 return;
             }
@@ -211,7 +213,7 @@ public class EntranceSelectionHandler implements Listener {
      * @param block             Block to get the open state from.
      */
     private void syncEntrances(EntranceSelection entranceSelection, Block block) {
-        Scheduler.runLater(plugin, () -> {
+        Scheduler.runLater(plugin, block.getLocation(), () -> {
             BlockData blockData = block.getBlockData();
             BlockFace blockFace = blockData instanceof Gate gate ? gate.getFacing() : null;
             entranceSelection.setEntrancesOpenState(((Openable) blockData).isOpen(), blockFace);
@@ -415,7 +417,7 @@ public class EntranceSelectionHandler implements Listener {
             return;
         }
         EntranceSelectionManager entranceSelectionManager = plugin.getEntranceSelectionManager();
-        if (entranceSelectionManager.getPlayerEntranceSelectionAmount(target) > entranceSelectionManager.computePlayerEntranceSelectionLimit(onlineTarget)) {
+        if (entranceSelectionManager.getPlayerEntranceSelectionAmount(target) >= entranceSelectionManager.computePlayerEntranceSelectionLimit(onlineTarget)) {
             Message.EXCEEDED_SELECTION_LIMIT_OTHER.sendError(player, Map.of("%target%", onlineTarget.getName()));
             return;
         }
@@ -488,7 +490,7 @@ public class EntranceSelectionHandler implements Listener {
     private void handleSelectionNameInput(Player player, String input) {
         UUID playerUuid = player.getUniqueId();
         EntranceSelection entranceSelection = selectionNameEditors.get(playerUuid);
-        if (InputUtil.attemptInputCancel(player, input, Message.ENTRANCE_SELECTION_ADD_MEMBER_CANCEL, selectionNameEditors,
+        if (InputUtil.attemptInputCancel(player, input, Message.ENTRANCE_SELECTION_NAME_INPUT_CANCEL, selectionNameEditors,
                 () -> MenuUtil.openSync(player, entranceSelection.createMembersMenu(1)))) {
             return;
         }
@@ -497,7 +499,7 @@ public class EntranceSelectionHandler implements Listener {
             Message.ALREADY_USED_ID.sendError(player, Map.of("%id%", newSelectionName));
             return;
         }
-        selectionMemberAdders.remove(playerUuid);
+        selectionNameEditors.remove(playerUuid);
         entranceSelection.setDisplayName(newSelectionName);
         MenuUtil.openSync(player, entranceSelection.createSettingsMenu());
         CommonSound.SUCCESS.play(player);
@@ -697,6 +699,8 @@ public class EntranceSelectionHandler implements Listener {
      * @return True if the passed location is a blacklisted region.
      */
     private boolean isBlacklistedRegion(Player player, Location location, boolean notify) {
+        if (!Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) return false;
+
         List<String> applicableRegions = WorldGuard.getInstance().getPlatform().getRegionContainer()
                 .get(BukkitAdapter.adapt(location.getWorld()))
                 .getApplicableRegionsIDs(BukkitAdapter.asBlockVector(location));
